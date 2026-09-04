@@ -26,6 +26,9 @@
   align-items: center;
   gap: 14px;
 }
+.swo-header > * {
+  flex-shrink: 0;
+}
 .swo-toggle {
   border: 1px solid #dfdfe8;
   background: #fff;
@@ -77,7 +80,10 @@
   text-decoration: underline;
 }
 .swo-readout {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
 }
 .swo-readout[data-state="error"] {

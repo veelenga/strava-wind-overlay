@@ -101,7 +101,7 @@ export function createControls(
   );
   query<HTMLButtonElement>(".swo-debug").addEventListener("click", () => {
     options.onCopyDebug().then(
-      () => setStatus("Debug report copied. Paste it into a GitHub issue."),
+      () => setStatus("Debug report copied"),
       () =>
         setStatus(
           "Could not copy. Open DevTools and filter the console by [swo].",
