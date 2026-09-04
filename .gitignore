@@ -1,0 +1,6 @@
+node_modules
+dist
+*.zip
+*.mov
+gif-review
+.DS_Store

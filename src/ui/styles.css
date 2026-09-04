@@ -1,0 +1,176 @@
+.swo-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  width: min(1100px, calc(100% - 150px));
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  font:
+    13px / 1.3 -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: #242428;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.swo-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.swo-toggle {
+  border: 1px solid #dfdfe8;
+  background: #fff;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.swo-toggle[aria-pressed="true"] {
+  background: #fc5200;
+  border-color: #fc5200;
+  color: #fff;
+}
+.swo-now {
+  border: 0;
+  background: none;
+  color: #fc5200;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.swo-place {
+  color: #6d6d78;
+}
+.swo-place::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  border: 2px solid #fc5200;
+  vertical-align: -1px;
+}
+.swo-source {
+  color: #6d6d78;
+  font-size: 12px;
+}
+.swo-debug {
+  border: 0;
+  background: none;
+  color: #6d6d78;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.swo-readout {
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+}
+.swo-readout[data-state="error"] {
+  color: #c0392b;
+}
+.swo-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 110px;
+}
+.swo-legend-bar {
+  height: 8px;
+  border-radius: 2px;
+}
+.swo-legend-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #6d6d78;
+  font-variant-numeric: tabular-nums;
+}
+.swo-timeline {
+  position: relative;
+  padding-top: 22px;
+  margin-left: 34px;
+}
+.swo-timeline input {
+  display: block;
+  width: 100%;
+  margin: 0 0 4px;
+  accent-color: #fc5200;
+  cursor: pointer;
+}
+.swo-timeline output {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: #fc5200;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.swo-days {
+  display: flex;
+  font-size: 12px;
+  font-weight: 600;
+}
+.swo-days span {
+  border-left: 1px solid #dfdfe8;
+  padding-left: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.swo-row {
+  position: relative;
+  display: flex;
+  height: 16px;
+  font-size: 10px;
+  color: #6d6d78;
+  font-variant-numeric: tabular-nums;
+}
+.swo-row i {
+  flex: 1;
+}
+.swo-row b {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-weight: 400;
+  line-height: 16px;
+}
+.swo-speed,
+.swo-gusts {
+  color: #242428;
+  font-weight: 600;
+}
+.swo-speed b,
+.swo-gusts b {
+  font-weight: 600;
+}
+.swo-row label {
+  position: absolute;
+  right: 100%;
+  padding-right: 6px;
+  line-height: 16px;
+  font-size: 10px;
+  color: #6d6d78;
+}
+.swo-arrows b {
+  font-size: 11px;
+}
