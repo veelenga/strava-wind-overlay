@@ -13,9 +13,6 @@ const ARROW = "➤";
 const ARROW_BASE_ROTATION = -90;
 const HALF_CIRCLE = 180;
 const MESSAGE_HIDE_MS = 3000;
-const CHEVRON =
-  '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
 export interface ControlsOptions {
   enabled: boolean;
   collapsed: boolean;
@@ -56,7 +53,7 @@ export function createControls(
       </div>
       <span class="swo-meta"><span class="swo-source"></span><button class="swo-debug" type="button" title="Copy a debug report to the clipboard">Debug</button></span>
       </div>
-      <button class="swo-collapse" type="button">${CHEVRON}</button>
+      <button class="swo-collapse" type="button"></button>
     </div>
     <div class="swo-timeline">
       <output></output>

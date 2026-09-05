@@ -23,8 +23,8 @@
 .swo-panel[data-collapsed="true"] .swo-timeline {
   display: none;
 }
-.swo-panel[data-collapsed="true"] .swo-collapse svg {
-  transform: rotate(180deg);
+.swo-panel[data-collapsed="true"] .swo-collapse::before {
+  transform: translateY(2px) rotate(225deg);
 }
 .swo-header {
   display: flex;
@@ -122,6 +122,14 @@
   height: 28px;
   color: #6d6d78;
   padding: 0;
+}
+.swo-collapse::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
 }
 .swo-collapse:hover {
   color: #242428;
