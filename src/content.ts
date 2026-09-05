@@ -131,15 +131,13 @@ async function main(): Promise<void> {
     if (grid && isStale(grid) && settings.enabled) render();
   }, STALE_CHECK_MS);
   for (const type of ["pointerdown", "wheel"] as const) {
-    container.addEventListener(type, (event) => {
-      if (controls.contains(event.target as Node)) return;
+    container.addEventListener(type, () => {
       overlay.setVisible(false);
       scheduleRender();
     });
   }
   container.addEventListener("pointermove", (event) => {
     if (!field || !view) return;
-    if (controls.contains(event.target as Node)) return controls.setHover(null);
     const rect = container.getBoundingClientRect();
     const { lat, lng } = unproject(
       event.clientX - rect.left,

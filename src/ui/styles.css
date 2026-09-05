@@ -28,20 +28,27 @@
 }
 .swo-header {
   display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.swo-header-main {
+  flex: 1;
+  display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 14px;
-  padding-right: 36px;
-  min-height: 28px;
+}
+.swo-toggle,
+.swo-collapse {
+  border: 1px solid #dfdfe8;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
 }
 .swo-toggle {
-  border: 1px solid #dfdfe8;
-  background: #fff;
-  border-radius: 6px;
   padding: 5px 10px;
   font: inherit;
   font-weight: 600;
-  cursor: pointer;
 }
 .swo-toggle[aria-pressed="true"] {
   background: #fc5200;
@@ -56,9 +63,6 @@
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
-}
-.swo-now[hidden] {
-  display: none;
 }
 .swo-place {
   font-weight: 600;
@@ -111,19 +115,12 @@
   text-decoration: underline;
 }
 .swo-collapse {
-  position: absolute;
-  top: 6px;
-  right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: 1px solid #dfdfe8;
-  border-radius: 6px;
-  background: #fff;
   color: #6d6d78;
-  cursor: pointer;
   padding: 0;
 }
 .swo-collapse:hover {

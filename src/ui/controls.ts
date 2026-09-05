@@ -33,7 +33,6 @@ export interface Controls {
   setSource(text: string): void;
   showMessage(text: string, isError?: boolean): void;
   clearMessage(): void;
-  contains(node: Node): boolean;
 }
 
 export function createControls(
@@ -45,6 +44,7 @@ export function createControls(
   panel.className = "swo-panel";
   panel.innerHTML = `
     <div class="swo-header">
+      <div class="swo-header-main">
       <button class="swo-toggle" type="button" aria-pressed="${options.enabled}">Wind</button>
       <button class="swo-now" type="button" title="Back to the current hour">Now</button>
       <span class="swo-place"></span>
@@ -55,6 +55,7 @@ export function createControls(
         <div class="swo-legend-ticks"><span>0</span><span>${LEGEND_MAX_SPEED / 2}</span><span>${LEGEND_MAX_SPEED}+ km/h</span></div>
       </div>
       <span class="swo-meta"><span class="swo-source"></span><button class="swo-debug" type="button" title="Copy a debug report to the clipboard">Debug</button></span>
+      </div>
       <button class="swo-collapse" type="button">${CHEVRON}</button>
     </div>
     <div class="swo-timeline">
@@ -85,19 +86,19 @@ export function createControls(
 
   let series: WindSample[] = [];
   let hover: WindSample | null = null;
-  let messageTimer = 0;
 
   const selectedOffset = () => Number(slider.value);
-  const updateReading = () => {
-    const sample = hover ?? series[selectedOffset()];
-    const prefix = hover ? "At cursor" : formatHour(selectedOffset());
+  const updateReading = (offset = selectedOffset()) => {
+    const sample = hover ?? series[offset];
+    const prefix = hover ? "At cursor" : formatHour(offset);
     reading.textContent = sample ? `${prefix} · ${formatSample(sample)}` : "";
   };
   const updateTimeLabel = () => {
-    timeLabel.textContent = formatHour(selectedOffset());
-    timeLabel.style.left = thumbCenter(selectedOffset());
-    now.hidden = selectedOffset() === 0;
-    updateReading();
+    const offset = selectedOffset();
+    timeLabel.textContent = formatHour(offset);
+    timeLabel.style.left = thumbCenter(offset);
+    now.hidden = offset === 0;
+    updateReading(offset);
   };
   const commit = (hourOffset: number) => {
     slider.value = String(hourOffset);
@@ -112,20 +113,20 @@ export function createControls(
       : "Hide forecast timeline";
   };
   const showMessage = (text: string, isError = false) => {
-    clearTimeout(messageTimer);
     message.hidden = false;
     message.dataset.state = isError ? "error" : "";
     message.textContent = text;
-    if (!isError)
-      messageTimer = window.setTimeout(
-        () => (message.hidden = true),
-        MESSAGE_HIDE_MS,
-      );
+  };
+  const clearMessage = () => {
+    message.hidden = true;
   };
 
   setCollapsed(options.collapsed);
   updateTimeLabel();
 
+  for (const type of ["pointerdown", "pointermove", "wheel"] as const) {
+    panel.addEventListener(type, (event) => event.stopPropagation());
+  }
   panel.addEventListener("pointerenter", () => {
     hover = null;
     updateReading();
@@ -147,17 +148,17 @@ export function createControls(
   );
   query<HTMLButtonElement>(".swo-debug").addEventListener("click", () => {
     options.onCopyDebug().then(
-      () => showMessage("Debug report copied"),
+      () => {
+        showMessage("Debug report copied");
+        setTimeout(clearMessage, MESSAGE_HIDE_MS);
+      },
       () => showMessage("Copy failed, see the [swo] console log", true),
     );
   });
 
   return {
     showMessage,
-    clearMessage: () => {
-      message.hidden = true;
-    },
-    contains: (node) => panel.contains(node),
+    clearMessage,
     setHover(sample) {
       hover = sample;
       updateReading();
