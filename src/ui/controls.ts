@@ -12,23 +12,27 @@ const STRIP_ALPHA = 0.55;
 const ARROW = "➤";
 const ARROW_BASE_ROTATION = -90;
 const HALF_CIRCLE = 180;
+const MESSAGE_HIDE_MS = 3000;
+const CHEVRON =
+  '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 export interface ControlsOptions {
   enabled: boolean;
   collapsed: boolean;
   hourOffset: number;
-  onCollapse(collapsed: boolean): void;
   onToggle(enabled: boolean): void;
+  onCollapse(collapsed: boolean): void;
   onHourOffset(hourOffset: number): void;
   onCopyDebug(): Promise<void>;
 }
 
 export interface Controls {
-  setReadout(sample: WindSample | null): void;
-  setStatus(text: string, isError?: boolean): void;
+  setHover(sample: WindSample | null): void;
   setSeries(samples: WindSample[]): void;
   setPlace(text: string): void;
   setSource(text: string): void;
+  showMessage(text: string, isError?: boolean): void;
+  clearMessage(): void;
   contains(node: Node): boolean;
 }
 
@@ -39,22 +43,19 @@ export function createControls(
   injectStyles();
   const panel = document.createElement("div");
   panel.className = "swo-panel";
-  panel.dataset.collapsed = String(options.collapsed);
   panel.innerHTML = `
     <div class="swo-header">
       <button class="swo-toggle" type="button" aria-pressed="${options.enabled}">Wind</button>
       <button class="swo-now" type="button">Now</button>
-      <button class="swo-collapse" type="button" aria-expanded="${!options.collapsed}"></button>
       <span class="swo-place"></span>
+      <span class="swo-reading"></span>
+      <span class="swo-message" hidden></span>
       <div class="swo-legend">
         <div class="swo-legend-bar" style="background:${legendGradient()}"></div>
         <div class="swo-legend-ticks"><span>0</span><span>${LEGEND_MAX_SPEED / 2}</span><span>${LEGEND_MAX_SPEED}+ km/h</span></div>
       </div>
-    </div>
-    <div class="swo-status">
-      <div class="swo-readout"></div>
-      <span class="swo-source"></span>
-      <button class="swo-debug" type="button" title="Copy a debug report to the clipboard">Debug</button>
+      <span class="swo-meta"><span class="swo-source"></span><button class="swo-debug" type="button" title="Copy a debug report to the clipboard">Debug</button></span>
+      <button class="swo-collapse" type="button">${CHEVRON}</button>
     </div>
     <div class="swo-timeline">
       <output></output>
@@ -73,32 +74,53 @@ export function createControls(
   const collapse = query<HTMLButtonElement>(".swo-collapse");
   const slider = query<HTMLInputElement>("input");
   const timeLabel = query<HTMLOutputElement>("output");
-  const readout = query<HTMLDivElement>(".swo-readout");
+  const reading = query<HTMLSpanElement>(".swo-reading");
+  const message = query<HTMLSpanElement>(".swo-message");
   const place = query<HTMLSpanElement>(".swo-place");
   const source = query<HTMLSpanElement>(".swo-source");
   const speedRow = query<HTMLDivElement>(".swo-speed");
   const gustRow = query<HTMLDivElement>(".swo-gusts");
   const arrowRow = query<HTMLDivElement>(".swo-arrows");
 
+  let series: WindSample[] = [];
+  let hover: WindSample | null = null;
+  let messageTimer = 0;
+
+  const selectedOffset = () => Number(slider.value);
+  const updateReading = () => {
+    const sample = hover ?? series[selectedOffset()];
+    const prefix = hover ? "At cursor" : formatHour(selectedOffset());
+    reading.textContent = sample ? `${prefix} · ${formatSample(sample)}` : "";
+  };
   const updateTimeLabel = () => {
-    const offset = Number(slider.value);
-    timeLabel.textContent = formatHour(offset);
-    timeLabel.style.left = thumbCenter(offset);
+    timeLabel.textContent = formatHour(selectedOffset());
+    timeLabel.style.left = thumbCenter(selectedOffset());
+    updateReading();
   };
   const commit = (hourOffset: number) => {
     slider.value = String(hourOffset);
     updateTimeLabel();
     options.onHourOffset(hourOffset);
   };
-  const setStatus = (text: string, isError = false) => {
-    readout.dataset.state = isError ? "error" : "";
-    readout.textContent = text;
-  };
   const setCollapsed = (collapsed: boolean) => {
     panel.dataset.collapsed = String(collapsed);
     collapse.setAttribute("aria-expanded", String(!collapsed));
-    collapse.textContent = collapsed ? "Show" : "Hide";
+    collapse.title = collapsed
+      ? "Show forecast timeline"
+      : "Hide forecast timeline";
   };
+  const showMessage = (text: string, isError = false) => {
+    clearTimeout(messageTimer);
+    message.hidden = false;
+    message.dataset.state = isError ? "error" : "";
+    message.textContent = text;
+    if (!isError)
+      messageTimer = window.setTimeout(
+        () => (message.hidden = true),
+        MESSAGE_HIDE_MS,
+      );
+  };
+
   setCollapsed(options.collapsed);
   updateTimeLabel();
 
@@ -113,35 +135,36 @@ export function createControls(
     options.onToggle(enabled);
   });
   slider.addEventListener("input", updateTimeLabel);
-  slider.addEventListener("change", () => commit(Number(slider.value)));
+  slider.addEventListener("change", () => commit(selectedOffset()));
   query<HTMLButtonElement>(".swo-now").addEventListener("click", () =>
     commit(0),
   );
   query<HTMLButtonElement>(".swo-debug").addEventListener("click", () => {
     options.onCopyDebug().then(
-      () => setStatus("Debug report copied"),
-      () =>
-        setStatus(
-          "Could not copy. Open DevTools and filter the console by [swo].",
-          true,
-        ),
+      () => showMessage("Debug report copied"),
+      () => showMessage("Copy failed, see the [swo] console log", true),
     );
   });
 
   return {
-    setStatus,
+    showMessage,
+    clearMessage: () => {
+      message.hidden = true;
+    },
     contains: (node) => panel.contains(node),
-    setReadout(sample) {
-      readout.dataset.state = "";
-      readout.textContent = sample ? formatSample(sample) : "";
+    setHover(sample) {
+      hover = sample;
+      updateReading();
     },
     setPlace(text) {
-      place.textContent = `Timeline at map centre: ${text}`;
+      place.textContent = text;
     },
     setSource(text) {
       source.textContent = text;
     },
     setSeries(samples) {
+      series = samples;
+      updateReading();
       fillRow(speedRow, samples, (sample) => sample.speed);
       fillRow(gustRow, samples, (sample) => sample.gusts);
       fillRow(arrowRow, samples, null, arrowLabel);
