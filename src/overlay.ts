@@ -3,8 +3,6 @@ import type { Size } from "./mercator";
 const CANVAS_STYLE =
   "position:absolute;inset:0;width:100%;height:100%;pointer-events:none";
 const FADE_STYLE = "transition:opacity 150ms";
-const CENTER_MARKER_STYLE =
-  "position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-9px 0 0 -9px;border:2px solid #fc5200;border-radius:50%;box-shadow:0 0 0 2px #fff";
 
 export interface Overlay {
   fill: HTMLCanvasElement;
@@ -22,9 +20,7 @@ export function createOverlay(
   layer.style.cssText = `${CANVAS_STYLE};${FADE_STYLE}`;
   const fill = createCanvas();
   const particles = createCanvas();
-  const marker = document.createElement("div");
-  marker.style.cssText = CENTER_MARKER_STYLE;
-  layer.append(fill, particles, marker);
+  layer.append(fill, particles);
   container.appendChild(layer);
 
   const size = () => ({

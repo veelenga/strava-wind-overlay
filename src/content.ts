@@ -87,7 +87,7 @@ async function main(): Promise<void> {
     controls.setPlace(coordinates);
     const name = await placeName(target.lat, target.lng);
     log("place", { coordinates, name });
-    if (name && view === target) controls.setPlace(`${name} (${coordinates})`);
+    if (name && view === target) controls.setPlace(name);
   };
 
   const render = async () => {
@@ -97,7 +97,7 @@ async function main(): Promise<void> {
       grid = await ensureGrid(grid, visibleBounds(view, size), controls);
     } catch (error) {
       logError("fetch", error);
-      controls.setStatus(
+      controls.showMessage(
         error instanceof Error ? error.message : "Wind data unavailable",
         true,
       );
@@ -109,7 +109,7 @@ async function main(): Promise<void> {
         hourOffset: settings.hourOffset,
         firstTime: grid.times[0],
       });
-      controls.setStatus("Forecast not available for this time", true);
+      controls.showMessage("Forecast not available for this time", true);
       return hide();
     }
     field = createWindField(grid, hourIndex);
@@ -118,7 +118,7 @@ async function main(): Promise<void> {
     drawFill(overlay.fill, field, view, size);
     particles.start(field, view, size);
     overlay.setVisible(true);
-    controls.setStatus("Hover the map for wind at a point");
+    controls.clearMessage();
     log("render", { view, hourIndex });
   };
 
@@ -131,14 +131,13 @@ async function main(): Promise<void> {
     if (grid && isStale(grid) && settings.enabled) render();
   }, STALE_CHECK_MS);
   for (const type of ["pointerdown", "wheel"] as const) {
-    container.addEventListener(type, (event) => {
-      if (controls.contains(event.target as Node)) return;
+    container.addEventListener(type, () => {
       overlay.setVisible(false);
       scheduleRender();
     });
   }
   container.addEventListener("pointermove", (event) => {
-    if (!field || !view || controls.contains(event.target as Node)) return;
+    if (!field || !view) return;
     const rect = container.getBoundingClientRect();
     const { lat, lng } = unproject(
       event.clientX - rect.left,
@@ -146,8 +145,9 @@ async function main(): Promise<void> {
       view,
       overlay.size(),
     );
-    controls.setReadout(field.sample(lat, lng));
+    controls.setHover(field.sample(lat, lng));
   });
+  container.addEventListener("pointerleave", () => controls.setHover(null));
 }
 
 const isStale = (grid: WindGrid) =>
@@ -160,7 +160,7 @@ async function ensureGrid(
 ): Promise<WindGrid> {
   if (current && !isStale(current) && contains(current.bounds, visible))
     return current;
-  controls.setStatus("Loading wind…");
+  controls.showMessage("Loading wind…");
   const started = performance.now();
   const grid = await fetchWindGrid(paddedBounds(visible), FORECAST_DAYS);
   log("fetch", {
@@ -168,7 +168,7 @@ async function ensureGrid(
     hours: grid.times.length,
     ms: Math.round(performance.now() - started),
   });
-  controls.setSource(`${SOURCE_NAME} · updated ${formatClock(grid.fetchedAt)}`);
+  controls.setSource(`${SOURCE_NAME} ${formatClock(grid.fetchedAt)}`);
   return grid;
 }
 
