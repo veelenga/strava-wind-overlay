@@ -46,7 +46,7 @@ export function createControls(
   panel.innerHTML = `
     <div class="swo-header">
       <button class="swo-toggle" type="button" aria-pressed="${options.enabled}">Wind</button>
-      <button class="swo-now" type="button">Now</button>
+      <button class="swo-now" type="button" title="Back to the current hour">Now</button>
       <span class="swo-place"></span>
       <span class="swo-reading"></span>
       <span class="swo-message" hidden></span>
@@ -72,6 +72,7 @@ export function createControls(
     panel.querySelector(selector) as T;
   const toggle = query<HTMLButtonElement>(".swo-toggle");
   const collapse = query<HTMLButtonElement>(".swo-collapse");
+  const now = query<HTMLButtonElement>(".swo-now");
   const slider = query<HTMLInputElement>("input");
   const timeLabel = query<HTMLOutputElement>("output");
   const reading = query<HTMLSpanElement>(".swo-reading");
@@ -95,6 +96,7 @@ export function createControls(
   const updateTimeLabel = () => {
     timeLabel.textContent = formatHour(selectedOffset());
     timeLabel.style.left = thumbCenter(selectedOffset());
+    now.hidden = selectedOffset() === 0;
     updateReading();
   };
   const commit = (hourOffset: number) => {

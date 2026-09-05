@@ -51,11 +51,14 @@
 .swo-now {
   border: 0;
   background: none;
-  color: #fc5200;
+  color: #6d6d78;
   font: inherit;
-  font-weight: 600;
   cursor: pointer;
   padding: 0;
+  text-decoration: underline;
+}
+.swo-now[hidden] {
+  display: none;
 }
 .swo-place {
   font-weight: 600;
@@ -146,7 +149,7 @@
   transform: translateX(-50%);
   padding: 1px 7px;
   border-radius: 4px;
-  background: #fc5200;
+  background: #242428;
   color: #fff;
   font-size: 11px;
   font-weight: 600;
