@@ -15,7 +15,9 @@ const HALF_CIRCLE = 180;
 
 export interface ControlsOptions {
   enabled: boolean;
+  collapsed: boolean;
   hourOffset: number;
+  onCollapse(collapsed: boolean): void;
   onToggle(enabled: boolean): void;
   onHourOffset(hourOffset: number): void;
   onCopyDebug(): Promise<void>;
@@ -37,18 +39,22 @@ export function createControls(
   injectStyles();
   const panel = document.createElement("div");
   panel.className = "swo-panel";
+  panel.dataset.collapsed = String(options.collapsed);
   panel.innerHTML = `
     <div class="swo-header">
       <button class="swo-toggle" type="button" aria-pressed="${options.enabled}">Wind</button>
       <button class="swo-now" type="button">Now</button>
+      <button class="swo-collapse" type="button" aria-expanded="${!options.collapsed}"></button>
       <span class="swo-place"></span>
-      <div class="swo-readout"></div>
-      <span class="swo-source"></span>
-      <button class="swo-debug" type="button" title="Copy a debug report to the clipboard">Debug</button>
       <div class="swo-legend">
         <div class="swo-legend-bar" style="background:${legendGradient()}"></div>
         <div class="swo-legend-ticks"><span>0</span><span>${LEGEND_MAX_SPEED / 2}</span><span>${LEGEND_MAX_SPEED}+ km/h</span></div>
       </div>
+    </div>
+    <div class="swo-status">
+      <div class="swo-readout"></div>
+      <span class="swo-source"></span>
+      <button class="swo-debug" type="button" title="Copy a debug report to the clipboard">Debug</button>
     </div>
     <div class="swo-timeline">
       <output></output>
@@ -64,6 +70,7 @@ export function createControls(
   const query = <T extends Element>(selector: string) =>
     panel.querySelector(selector) as T;
   const toggle = query<HTMLButtonElement>(".swo-toggle");
+  const collapse = query<HTMLButtonElement>(".swo-collapse");
   const slider = query<HTMLInputElement>("input");
   const timeLabel = query<HTMLOutputElement>("output");
   const readout = query<HTMLDivElement>(".swo-readout");
@@ -87,8 +94,19 @@ export function createControls(
     readout.dataset.state = isError ? "error" : "";
     readout.textContent = text;
   };
+  const setCollapsed = (collapsed: boolean) => {
+    panel.dataset.collapsed = String(collapsed);
+    collapse.setAttribute("aria-expanded", String(!collapsed));
+    collapse.textContent = collapsed ? "Show" : "Hide";
+  };
+  setCollapsed(options.collapsed);
   updateTimeLabel();
 
+  collapse.addEventListener("click", () => {
+    const collapsed = panel.dataset.collapsed !== "true";
+    setCollapsed(collapsed);
+    options.onCollapse(collapsed);
+  });
   toggle.addEventListener("click", () => {
     const enabled = toggle.getAttribute("aria-pressed") !== "true";
     toggle.setAttribute("aria-pressed", String(enabled));

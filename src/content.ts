@@ -48,7 +48,12 @@ async function main(): Promise<void> {
 
   const controls: Controls = createControls(container, {
     enabled: settings.enabled,
+    collapsed: settings.collapsed,
     hourOffset: settings.hourOffset,
+    onCollapse(collapsed) {
+      settings.collapsed = collapsed;
+      saveSettings(settings);
+    },
     onToggle(enabled) {
       settings.enabled = enabled;
       saveSettings(settings);

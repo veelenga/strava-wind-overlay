@@ -2,10 +2,11 @@ const STORAGE_KEY = "strava-wind-overlay";
 
 export interface Settings {
   enabled: boolean;
+  collapsed: boolean;
   hourOffset: number;
 }
 
-const DEFAULTS: Settings = { enabled: true, hourOffset: 0 };
+const DEFAULTS: Settings = { enabled: true, collapsed: false, hourOffset: 0 };
 
 export function loadSettings(): Settings {
   try {
