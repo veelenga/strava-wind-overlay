@@ -126,6 +126,10 @@ export function createControls(
   setCollapsed(options.collapsed);
   updateTimeLabel();
 
+  panel.addEventListener("pointerenter", () => {
+    hover = null;
+    updateReading();
+  });
   collapse.addEventListener("click", () => {
     const collapsed = panel.dataset.collapsed !== "true";
     setCollapsed(collapsed);
